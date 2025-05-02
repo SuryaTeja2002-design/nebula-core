@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  engine:
+    build: ./market-engine
+    container_name: market-engine
+    ports:
+      - "5000:5000"
+    working_dir: /app/build
+    command: ["./market_engine"]
+    depends_on:
+      - spectra-ai
+
+  spectra-ai:
+    build: ./spectra-ai
+    container_name: spectra-ai
+    ports:
+      - "6000:6000"
+    working_dir: /app/src
+    command: ["gunicorn", "--bind", "0.0.0.0:6000", "main:app"]
+    volumes:
+      - ./spectra-ai:/app
+
+  dash-ui:
+    build: ./dash-ui/src/nebula-dashboard
+    container_name: nebula-dashboard
+    ports:
+      - "3000:3000"
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: ["npm", "start"]
+    volumes:
+      - ./dash-ui/src/nebula-dashboard:/app
+    depends_on:
+      - spectra-ai
